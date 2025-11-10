@@ -96,6 +96,7 @@ class Program
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih korisnika\n");
+                        AbecedniIspisKorisnika(dictKorisnika);
                         break;
                     default:
                         Console.WriteLine("Pogrešan odabir.Ponovno unesi\n");
@@ -187,7 +188,7 @@ class Program
             string? unosIme = Console.ReadLine();
             if (!string.IsNullOrEmpty(unosIme) && unosIme.All(stringChar => char.IsLetter(stringChar)))
             {
-                string unosImeUpper=char.ToUpper(unosIme[0])+unosIme.Substring(1);
+                string unosImeUpper=char.ToUpper(unosIme[0])+unosIme.Substring(1).ToLower();
                 return unosImeUpper;
             }
 
@@ -204,5 +205,14 @@ class Program
                 return unosDatumRodenja;
             Console.WriteLine("Pogrešan unos datuma rođenja.");
         }               
+    }
+
+    static void AbecedniIspisKorisnika(Korisnik dictKorisnika)
+    {
+        var dictSorted=dictKorisnika.OrderBy(keyValuePair=>keyValuePair.Value.Item2);
+        foreach (var keyValuePair in dictSorted)
+        {
+            Console.WriteLine("{0} - {1} - {2} - {3}\n",keyValuePair.Key,keyValuePair.Value.Item1,keyValuePair.Value.Item2,keyValuePair.Value.Item3);
+        }
     }
 }
