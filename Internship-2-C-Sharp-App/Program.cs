@@ -34,8 +34,7 @@ class Program
 
     static void GlavniIzbornik()
     {
-        bool unosUspjesan = false;
-        while (!unosUspjesan)
+        while (true)
         {
             Console.WriteLine("1 - Korisnici\n2 - Putovanja\n0 - Izlaz iz aplikacije\n");
             if (int.TryParse(Console.ReadLine(), out int unosGlavniIzbornik ))
@@ -49,12 +48,10 @@ class Program
                     case 1:
                         Console.WriteLine("Uspješan odabir menija za korisnike.\n");
                         KorisniciIzbornik();
-                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir menija za putovanja.\n");
                         PutovanjeIzbornik();
-                        unosUspjesan = true;
                         break;
                     default:
                         Console.WriteLine("Pogrešan unos broja.Pokušaj ponovno\n");
@@ -69,8 +66,7 @@ class Program
     }
     static void KorisniciIzbornik()
     {
-        bool unosUspjesan = false;
-        while (!unosUspjesan)
+        while (true)
         {
             Console.WriteLine("1 - Unos novog korisnika\n");
             Console.WriteLine("2 - Brisanje korisnika\n");
@@ -87,19 +83,15 @@ class Program
                         return;
                     case 1:
                         Console.WriteLine("Uspješan odabir.Unos novog korisnika\n");
-                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Brisanje korisnika\n");
-                        unosUspjesan = true;
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje korisnika\n");
-                        unosUspjesan = true;
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih korisnika\n");
-                        unosUspjesan = true;
                         break;
                     default:
                         Console.WriteLine("Pogrešan odabir.Ponovno unesi\n");
@@ -115,8 +107,7 @@ class Program
 
     static void PutovanjeIzbornik()
     {
-        bool unosUspjesan = false;
-        while (!unosUspjesan)
+        while (true)
         {
             Console.WriteLine("1 - Unos novog putovanja\n");
             Console.WriteLine("2 - Brisanje putovanja\n");
@@ -134,19 +125,15 @@ class Program
                         return;
                     case 1:
                         Console.WriteLine("Uspješan odabir.Unos novog putovanja\n");
-                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Brisanje putovanja\n");
-                        unosUspjesan = true;
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja\n");
-                        unosUspjesan = true;
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih putovanja\n");
-                        unosUspjesan = true;
                         break;
                     case 5:
                         Console.WriteLine("Uspješan odabir.Izvještaji i analize\n");
@@ -162,4 +149,6 @@ class Program
             }   
         }        
     }
+
+
 }
