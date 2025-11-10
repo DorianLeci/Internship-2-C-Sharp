@@ -29,7 +29,13 @@ class Program
         korisnik[2] = Tuple.Create("Vesna", "Leci", new DateTime(1971, 01, 23), korisnik2PopisPutovanja);
         korisnik[3]=Tuple.Create("Damir","Leci",new DateTime(1969,05,18), korisnik3PopisPutovanja);
         
-        while (true)
+        GlavniIzbornik();
+    }
+
+    static void GlavniIzbornik()
+    {
+        bool unosUspjesan = false;
+        while (!unosUspjesan)
         {
             Console.WriteLine("1 - Korisnici\n2 - Putovanja\n0 - Izlaz iz aplikacije\n");
             if (int.TryParse(Console.ReadLine(), out int unosGlavniIzbornik ))
@@ -43,26 +49,28 @@ class Program
                     case 1:
                         Console.WriteLine("Uspješan odabir menija za korisnike.\n");
                         KorisniciIzbornik();
+                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir menija za putovanja.\n");
                         PutovanjeIzbornik();
+                        unosUspjesan = true;
                         break;
                     default:
-                        Console.WriteLine("Pogrešan unos.Pokušaj ponovno\n");
+                        Console.WriteLine("Pogrešan unos broja.Pokušaj ponovno\n");
                         break;
                 }
-
-                break;
             }
-
-
-        }
-
-    }    
+            else
+            {
+                Console.WriteLine("Pogrešan format unosa->mora biti integer\n");
+            }
+        }        
+    }
     static void KorisniciIzbornik()
     {
-        while (true)
+        bool unosUspjesan = false;
+        while (!unosUspjesan)
         {
             Console.WriteLine("1 - Unos novog korisnika\n");
             Console.WriteLine("2 - Brisanje korisnika\n");
@@ -75,32 +83,40 @@ class Program
                 {
                     case 0:
                         Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik\n");
-                        break;
+                        GlavniIzbornik();
+                        return;
                     case 1:
                         Console.WriteLine("Uspješan odabir.Unos novog korisnika\n");
+                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Brisanje korisnika\n");
+                        unosUspjesan = true;
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje korisnika\n");
+                        unosUspjesan = true;
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih korisnika\n");
+                        unosUspjesan = true;
                         break;
                     default:
                         Console.WriteLine("Pogrešan odabir.Ponovno unesi\n");
                         break;
                 }
-
-                break;
             }
+            else
+            {
+                Console.WriteLine("Pogrešan format unosa->mora biti integer\n");
+            }            
         }
     }
 
     static void PutovanjeIzbornik()
     {
-        while (true)
+        bool unosUspjesan = false;
+        while (!unosUspjesan)
         {
             Console.WriteLine("1 - Unos novog putovanja\n");
             Console.WriteLine("2 - Brisanje putovanja\n");
@@ -114,18 +130,23 @@ class Program
                 {
                     case 0:
                         Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik\n");
-                        break;
+                        GlavniIzbornik();
+                        return;
                     case 1:
                         Console.WriteLine("Uspješan odabir.Unos novog putovanja\n");
+                        unosUspjesan = true;
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Brisanje putovanja\n");
+                        unosUspjesan = true;
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja\n");
+                        unosUspjesan = true;
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih putovanja\n");
+                        unosUspjesan = true;
                         break;
                     case 5:
                         Console.WriteLine("Uspješan odabir.Izvještaji i analize\n");
@@ -134,9 +155,11 @@ class Program
                         Console.WriteLine("Pogrešan odabir.Ponovno unesi\n");
                         break;
                 }
-
-                break;
             }
+            else
+            {
+                Console.WriteLine("Pogrešan format unosa->mora biti integer\n");
+            }   
         }        
     }
 }
