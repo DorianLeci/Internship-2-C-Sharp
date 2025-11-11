@@ -202,16 +202,30 @@ class Program
         {
             Console.WriteLine("Unesi {0} korisnika",nameSurnameOutput);
             string? inputNameSurname = Console.ReadLine();
-            if (!string.IsNullOrEmpty(inputNameSurname) && inputNameSurname.All(stringChar => char.IsLetter(stringChar)))
+            if (!string.IsNullOrEmpty(inputNameSurname) && RemoveWhiteSpace(inputNameSurname).All(stringChar => char.IsLetter(stringChar)))
             {
-                string inputNameSurnameUpper=char.ToUpper(inputNameSurname[0])+inputNameSurname.Substring(1).ToLower();
-                return inputNameSurnameUpper;
+                inputNameSurname = inputNameSurname.Trim();
+                string[] inputArr= inputNameSurname.Split(" ",StringSplitOptions.RemoveEmptyEntries);
+                int i = 0;
+                foreach (var nameSurname in inputArr)
+                {
+                    inputArr[i]=char.ToUpper(nameSurname[0])+nameSurname.Substring(1).ToLower();
+                    if (i != (inputArr.Length - 1))
+                        inputArr[i] += " ";
+                    i++;
+                }
+
+                return string.Concat(inputArr);
             }
 
             Console.WriteLine("\nPogrešan unos {0}na .Ne smije biti prazno ili sadržavati brojeve/specijalne znakove",nameSurnameOutput);
         }       
     }
 
+    static string RemoveWhiteSpace(string target )
+    {
+        return string.Concat(target.Where(c => !char.IsWhiteSpace(c)));
+    }
     static DateOnly BirthDateInput()
     {
         while (true)
@@ -245,7 +259,7 @@ class Program
                         Console.Read();
                         break;
                     case 2:
-                        YearTresholdOutput(userDict);
+                        UserDeleteByNameSurname(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
@@ -260,21 +274,148 @@ class Program
 
     static void UserDeleteById(User userDict)
     {
+        int inputId;
         while (true)
         {
             Console.WriteLine("Unesi id korisnika kojeg želiš obrisati");
-            if (int.TryParse(Console.ReadLine(), out int inputId) && userDict.ContainsKey(inputId))
+            if (int.TryParse(Console.ReadLine(), out inputId) && userDict.ContainsKey(inputId))
             {
-                if(userDict.Remove(inputId))
-                    Console.WriteLine("Uspješno brisanje korisnika.\n");
-                return;
+                break;
             }
             else Console.WriteLine("\nId korisnika je u krivom formatu ili nije pronađen.");
-                
+        }
+        
+        if(ConfirmationMessage("obrisati"))
+        {
+            userDict.Remove(inputId);
+            Console.WriteLine("Uspješno brisanje korisnika.\n");
+            return;
+        }
 
+    }
+    static void UserDeleteByNameSurname(User userDict)
+    {
+        var foundUsersIdList = new List<int>();
+        string inputFormatted;
+        while (true)
+        {
+            Console.WriteLine("Unesi ime i prezima(u obliku Ime Prezime) korisnika kojeg želiš obrisati.");
+            string? inputNameSurname=Console.ReadLine();
+            
+            if (!string.IsNullOrEmpty(inputNameSurname) && RemoveWhiteSpace(inputNameSurname).All(stringChar => char.IsLetter(stringChar)))
+            {
+                inputNameSurname = inputNameSurname.Trim();
+                var inputArr= inputNameSurname.Split(" ",StringSplitOptions.RemoveEmptyEntries);
+                int i = 0;
+                foreach (var nameSurname in inputArr)
+                {
+                    inputArr[i]=char.ToUpper(nameSurname[0])+nameSurname.Substring(1).ToLower();
+                    if (i != (inputArr.Length - 1))
+                        inputArr[i] += " ";
+                    i++;
+                }
+
+                inputFormatted = string.Concat(inputArr);
+                var userDictList=userDict.ToList();
+                var foundUsers = userDictList.FindAll(kvPair => (kvPair.Value.Item1 + " " + kvPair.Value.Item2) == inputFormatted);
+                
+                foreach (var user in foundUsers)
+                    foundUsersIdList.Add(user.Key);
+                
+                break;
+            }
+            else Console.WriteLine("\nPogrešan unos imena i prezimena.Ne smije biti prazno ili sadržavati brojeve/specijalne znakove.\n");
+        }
+        
+        if (foundUsersIdList.Count > 0)
+        {
+            var userSelection=DeleteManyUsers(userDict,foundUsersIdList,inputFormatted);       
+            UserDelConfirm(userDict,userSelection);
+        }
+        else
+        {
+            Console.WriteLine("Ne postoji user s tim imenom i prezimenom.\n");
+        }
+        
+    }
+
+    static void UserDelConfirm(User userDict,string[] userSelection)
+    {
+        if(ConfirmationMessage("obrisati"))
+        {
+            foreach (var id in userSelection)
+            {
+                if(int.TryParse(id,out int parsedId))
+                    userDict.Remove(parsedId);                    
+            }
+       
+                
+            Console.WriteLine("Uspješno brisanje korisnika.\n");
+        }      
+    }
+    static bool ConfirmationMessage(string messageType)
+    {
+        Console.WriteLine("\nŽeliš li zaista {0} korisnika -- y/n. Ako je unos krajnjeg odabira neispravan ili je odabir 'n' operacija se obustavlja.\n",messageType);
+        if (char.TryParse(Console.ReadLine(), out char inputChar) && inputChar=='y')
+            return true;
+        else if (inputChar == 'n')
+        {
+            Console.WriteLine("\nOperacija obustavljena.Povratak na izbornik za brisanje nakon pritiska bilo koje tipke.\n");
+            return false;        
+        }
+        else
+        {
+            Console.WriteLine("\nUnos neispravan.Operacija se obustavljena.Povratak na izbornik za brisanje nakon pritiska bilo koje tipke.\n");
+            return false;
         }
     }
 
+    static string[] DeleteManyUsers(User userDict, List<int> foundUsersIdList,string inputFormatted)
+    {
+        string[] inputParts;
+        foundUsersIdList.Sort();
+        while (true)
+        {
+            Console.WriteLine("\nPostoji {0} korisnik(a) s istim imenom i prezimenom:{1}\n",foundUsersIdList.Count,inputFormatted);
+            IdListOutput(foundUsersIdList);
+            Console.WriteLine("Unesi sve korisnike koje želiš obrisati u formatu (id1 id2 id3..)\n");
+            
+            string? inputIdList=Console.ReadLine();
+            if (!string.IsNullOrEmpty(inputIdList))
+            {
+                inputIdList = inputIdList.Trim();
+                inputParts=inputIdList.Split(" ",StringSplitOptions.RemoveEmptyEntries);
+                int flag = 0;
+                foreach (var inputId in inputParts)
+                {
+                    flag = 0;
+
+                    if (int.TryParse(inputId, out int id) && (foundUsersIdList.BinarySearch(id) >= 0))
+                        flag = 1;
+                }
+
+                if (flag == 1)
+                    break;               
+                else Console.WriteLine("\nNeki od unesenih id-ova nije pronađen u listi dostupnih.");
+            }
+            
+            else Console.WriteLine("\nId lista korisnika je u krivom formatu.\n");
+        }
+
+        return inputParts;
+    }
+
+    static void IdListOutput(List<int>foundUsersIdList)
+    {
+        Console.WriteLine("Lista dostupnih id-eva za obrisati");
+        Console.Write("[ ");
+        foreach (var id in foundUsersIdList)
+        {
+            Console.Write(id+" ");
+        }
+
+        Console.Write("]\n");
+    }
     static void FormatedOutputType(User userDict)
     {
         while (true)
@@ -318,7 +459,7 @@ class Program
     static void AlphabetSortedOutput(User userDict)
     {
         Console.WriteLine("\nIspis korisnika sortranih abecedno po prezimenu\n");
-        var dictSorted=userDict.OrderBy(kvPar=>kvPar.Value.Item2);
+        var dictSorted=userDict.OrderBy(kvPar=>kvPar.Value.Item2).ThenBy(kvPar=>kvPar.Value.Item1).ToList();
         foreach (var kvPair in dictSorted)
         {
             FormatedOutput(kvPair);
