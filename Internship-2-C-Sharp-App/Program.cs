@@ -217,7 +217,7 @@ class Program
         while (true)
         {
             Console.WriteLine("Unesi datum rođenja (YYYY-MM-DD)");
-            if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputBirthDate))
+            if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputBirthDate) && inputBirthDate.ToDateTime(new TimeOnly()).Date<=DateTime.Now.Date)
                 return inputBirthDate;
             Console.WriteLine("\nPogrešan unos datuma rođenja.");
         }               
@@ -227,7 +227,7 @@ class Program
     {
         while (true)
         {
-            Console.WriteLine("0 - Povratak na KorisnickiIzbornik");
+            Console.WriteLine("0 - Povratak na korisnicki izbornik");
             Console.WriteLine("1 - Brisanje korisnika po id-u");
             Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu"); 
 
@@ -274,14 +274,7 @@ class Program
 
         }
     }
-    static void AlphabetSortedOutput(User userDict)
-    {
-        var dictSorted=userDict.OrderBy(kvPar=>kvPar.Value.Item2);
-        foreach (var kvPair in dictSorted)
-        {
-            FormatedOutput(kvPair);
-        }
-    }
+
     static void FormatedOutputType(User userDict)
     {
         while (true)
@@ -295,7 +288,7 @@ class Program
                 switch (inputNumber)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik izbornik\n");
+                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik\n");
                         UserMenu(userDict);
                         return;
                     case 1:
@@ -322,9 +315,18 @@ class Program
         }
         
     }
+    static void AlphabetSortedOutput(User userDict)
+    {
+        Console.WriteLine("\nIspis korisnika sortranih abecedno po prezimenu\n");
+        var dictSorted=userDict.OrderBy(kvPar=>kvPar.Value.Item2);
+        foreach (var kvPair in dictSorted)
+        {
+            FormatedOutput(kvPair);
+        }
+    }
     static void YearTresholdOutput(User userDict)
     {
-        Console.WriteLine("Ispis korisnika starijih od 20 godina\n");
+        Console.WriteLine("\nIspis korisnika starijih od 20 godina\n");
         foreach (var user in userDict)
         {
   
@@ -343,6 +345,7 @@ class Program
     
     static void TripTrehsoldOutput(User userDict)
     {
+        Console.WriteLine("\nIspis korisnika koji imaju bar 2 putovanja\n");
         foreach (var user in userDict )
         {
             if (user.Value.Item4.Count() >=2)
