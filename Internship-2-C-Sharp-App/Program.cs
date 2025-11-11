@@ -68,7 +68,7 @@ class Program
             }
             else
             {
-                Console.WriteLine("Pogrešan tip podatka->unesi cijeli broj.");
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
             }
         }        
     }
@@ -96,13 +96,16 @@ class Program
                         Console.Read();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje korisnika\n");
+                        Console.WriteLine("Uspješan odabir.Brisanje korisnika.\n");
+                        UserDelete(userDict);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje korisnika\n");
+                        Console.WriteLine("Uspješan odabir.Uređivanje korisnika.\n");
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih korisnika");
+                        Console.WriteLine("Uspješan odabir.Pregled svih korisnika.\n");
                         FormatedOutputType(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
@@ -114,7 +117,7 @@ class Program
             }
             else
             {
-                Console.WriteLine("Pogrešan tip podatka->unesi cijeli broj.");
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
             }            
         }
     }
@@ -134,32 +137,32 @@ class Program
                 switch (inputTripMenu)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik\n");
+                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik.");
                         MainMenu(userDict);
                         return;
                     case 1:
-                        Console.WriteLine("Uspješan odabir.Unos novog putovanja\n");
+                        Console.WriteLine("Uspješan odabir.Unos novog putovanja.");
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje putovanja\n");
+                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.");
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja\n");
+                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja");
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja\n");
+                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja");
                         break;
                     case 5:
-                        Console.WriteLine("Uspješan odabir.Izvještaji i analize\n");
+                        Console.WriteLine("Uspješan odabir.Izvještaji i analize");
                         break;
                     default:
-                        Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno.");
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
                         break;
                 }
             }
             else
             {
-                Console.WriteLine("Pogrešan tip podatka->unesi cijeli broj.");
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
             }   
         }        
     }
@@ -183,12 +186,12 @@ class Program
                 return inputId;
             
             if(inputId<0)
-                Console.WriteLine("Id ne smije biti negativan broj.");
+                Console.WriteLine("\nId ne smije biti negativan broj.");
             else if(userDict.ContainsKey(inputId))
-                Console.WriteLine("Id mora biti jedinstven.");
+                Console.WriteLine("\nId mora biti jedinstven.");
             else
             {
-                Console.WriteLine("Pogrešan tip podatka-> id mora biti cijeli broj");
+                Console.WriteLine("\nPogrešan tip podatka-> id mora biti cijeli broj");
             }
         }
     }
@@ -205,7 +208,7 @@ class Program
                 return inputNameSurnameUpper;
             }
 
-            Console.WriteLine("Pogrešan unos {0}na .Ne smije biti prazno ili sadržavati brojeve/specijalne znakove",nameSurnameOutput);
+            Console.WriteLine("\nPogrešan unos {0}na .Ne smije biti prazno ili sadržavati brojeve/specijalne znakove",nameSurnameOutput);
         }       
     }
 
@@ -216,10 +219,61 @@ class Program
             Console.WriteLine("Unesi datum rođenja (YYYY-MM-DD)");
             if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputBirthDate))
                 return inputBirthDate;
-            Console.WriteLine("Pogrešan unos datuma rođenja.");
+            Console.WriteLine("\nPogrešan unos datuma rođenja.");
         }               
     }
 
+    static void UserDelete(User userDict)
+    {
+        while (true)
+        {
+            Console.WriteLine("0 - Povratak na KorisnickiIzbornik");
+            Console.WriteLine("1 - Brisanje korisnika po id-u");
+            Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu"); 
+
+            if (int.TryParse(Console.ReadLine(),out int inputNumber))
+            {
+                switch (inputNumber)
+                {
+                    case 0:
+                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik\n");
+                        UserMenu(userDict);
+                        return;
+                    case 1:
+                        UserDeleteById(userDict);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 2:
+                        YearTresholdOutput(userDict);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    default:
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
+                        break;
+                }
+            }   
+            else Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
+        }
+    }
+
+    static void UserDeleteById(User userDict)
+    {
+        while (true)
+        {
+            Console.WriteLine("Unesi id korisnika kojeg želiš obrisati");
+            if (int.TryParse(Console.ReadLine(), out int inputId) && userDict.ContainsKey(inputId))
+            {
+                if(userDict.Remove(inputId))
+                    Console.WriteLine("Uspješno brisanje korisnika.\n");
+                return;
+            }
+            else Console.WriteLine("\nId korisnika je u krivom formatu ili nije pronađen.");
+                
+
+        }
+    }
     static void AlphabetSortedOutput(User userDict)
     {
         var dictSorted=userDict.OrderBy(kvPar=>kvPar.Value.Item2);
@@ -228,26 +282,6 @@ class Program
             FormatedOutput(kvPair);
         }
     }
-
-    static void YearTresholdOutput(User userDict)
-    {
-        Console.WriteLine("Ispis korisnika starijih od 20 godina\n");
-        foreach (var user in userDict)
-        {
-  
-            var birthDate = user.Value.Item3;
-            var birthDateTime = birthDate.ToDateTime(new TimeOnly()).Date;
-            var newestDate = DateTime.Today;
-            int age = newestDate.Year-birthDate.Year;
-            
-            if (birthDateTime> newestDate.AddYears(-age))
-                age--;
-            
-            if (age > 20)
-                FormatedOutput(user);         
-        }
-    }
-
     static void FormatedOutputType(User userDict)
     {
         while (true)
@@ -261,7 +295,7 @@ class Program
                 switch (inputNumber)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik\n");
+                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik izbornik\n");
                         UserMenu(userDict);
                         return;
                     case 1:
@@ -280,15 +314,33 @@ class Program
                         Console.Read();
                         break;
                     default:
-                        Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno.");
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
                         break;
                 }
             }   
-            else Console.WriteLine("Pogrešan tip podatka->unesi cijeli broj.");
+            else Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
         }
         
     }
-
+    static void YearTresholdOutput(User userDict)
+    {
+        Console.WriteLine("Ispis korisnika starijih od 20 godina\n");
+        foreach (var user in userDict)
+        {
+  
+            var birthDate = user.Value.Item3;
+            var birthDateTime = birthDate.ToDateTime(new TimeOnly()).Date;
+            var newestDate = DateTime.Today;
+            int age = newestDate.Year-birthDate.Year;
+            
+            if (birthDateTime> newestDate.AddYears(-age))
+                age--;
+            
+            if (age > 20)
+                FormatedOutput(user);         
+        }
+    }
+    
     static void TripTrehsoldOutput(User userDict)
     {
         foreach (var user in userDict )
