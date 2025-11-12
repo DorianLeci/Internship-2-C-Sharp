@@ -742,11 +742,11 @@ class Program
     static void TripOutputByOrder()
     {
         foreach (var trip in GlobalTripList)
-            FormatedTripOutput(trip);
+            FormattedTripOutput(trip);
             
     }
 
-    static void FormatedTripOutput(Tuple<int,TripValue> trip)
+    static void FormattedTripOutput(Tuple<int,TripValue> trip)
     {
         Console.WriteLine("\n---------");
         Console.WriteLine("Putovanje #{0}",trip.Item1);
@@ -763,13 +763,13 @@ class Program
         {
             var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item5);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);
+                FormattedTripOutput(trip);
         }
         else if (sortDir == 1)
         {
             var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item5);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);            
+                FormattedTripOutput(trip);            
         }
     }
     static void TripOutputDist(int sortDir)
@@ -778,13 +778,13 @@ class Program
         {
             var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item2);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);
+                FormattedTripOutput(trip);
         }
         else if (sortDir == 1)
         {
             var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item2);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);            
+                FormattedTripOutput(trip);            
         }
     }
     static void TripOutputDate(int sortDir)
@@ -793,13 +793,13 @@ class Program
         {
             var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item1);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);
+                FormattedTripOutput(trip);
         }
         else if (sortDir == 1)
         {
             var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item1);
             foreach (var trip in listSorted)
-                FormatedTripOutput(trip);            
+                FormattedTripOutput(trip);            
         }
     }
 }
