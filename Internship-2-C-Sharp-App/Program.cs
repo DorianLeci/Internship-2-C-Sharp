@@ -103,6 +103,9 @@ class Program
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje korisnika.\n");
+                        ModifyUser(userDict);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih korisnika.\n");
@@ -170,13 +173,18 @@ class Program
     static void NewUserInput(User userDict)
     {
         int id = IdInput(userDict);
+        var addedInfo=AddUserInfo(userDict,id);
+        userDict[id] = addedInfo;
+
+    }
+
+    static Tuple<string,string,DateOnly,Trip> AddUserInfo(User userDict,int id)
+    {
         string name = StringInput("ime");
         string surname= StringInput("prezime");
         DateOnly birthDate = BirthDateInput();
-        userDict[id] = Tuple.Create(name, surname,birthDate,new Trip());
-        
+        return Tuple.Create(name, surname,birthDate,new Trip());  
     }
-
     static int IdInput(User userDict)
     {
         while (true)
@@ -241,9 +249,9 @@ class Program
     {
         while (true)
         {
-            Console.WriteLine("0 - Povratak na korisnicki izbornik");
             Console.WriteLine("1 - Brisanje korisnika po id-u");
             Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu"); 
+            Console.WriteLine("0 - Povratak na korisnicki izbornik");
 
             if (int.TryParse(Console.ReadLine(),out int inputNumber))
             {
@@ -274,24 +282,28 @@ class Program
 
     static void UserDeleteById(User userDict)
     {
-        int inputId;
-        while (true)
-        {
-            Console.WriteLine("Unesi id korisnika kojeg želiš obrisati");
-            if (int.TryParse(Console.ReadLine(), out inputId) && userDict.ContainsKey(inputId))
-            {
-                break;
-            }
-            else Console.WriteLine("\nId korisnika je u krivom formatu ili nije pronađen.");
-        }
+        int inputId = InputValidUserId(userDict,"obrisati");
         
         if(ConfirmationMessage("obrisati"))
         {
             userDict.Remove(inputId);
             Console.WriteLine("Uspješno brisanje korisnika.\n");
-            return;
         }
 
+    }
+
+    static int InputValidUserId(User userDict,string messageType)
+    {
+        while (true)
+        {
+            Console.WriteLine("Unesi id korisnika kojeg želiš {0}",messageType);
+            if (int.TryParse(Console.ReadLine(), out int inputId) && userDict.ContainsKey(inputId))
+            {
+                return inputId;
+            }
+            else Console.WriteLine("\nId korisnika je u krivom formatu ili nije pronađen.");
+        }
+        
     }
     static void UserDeleteByNameSurname(User userDict)
     {
@@ -360,12 +372,12 @@ class Program
             return true;
         else if (inputChar == 'n')
         {
-            Console.WriteLine("\nOperacija obustavljena.Povratak na izbornik za brisanje nakon pritiska bilo koje tipke.\n");
+            Console.WriteLine("\nOperacija obustavljena.Povratak na prethodni izbornik nakon pritiska bilo koje tipke.\n");
             return false;        
         }
         else
         {
-            Console.WriteLine("\nUnos neispravan.Operacija se obustavljena.Povratak na izbornik za brisanje nakon pritiska bilo koje tipke.\n");
+            Console.WriteLine("\nUnos neispravan.Operacija se obustavljena.Povratak na prethodni izbornik nakon pritiska bilo koje tipke.\n");
             return false;
         }
     }
@@ -415,6 +427,18 @@ class Program
         }
 
         Console.Write("]\n");
+    }
+
+    static void ModifyUser(User userDict)
+    {
+        int inputId=InputValidUserId(userDict,"izmijeniti");
+        var modifiedInfo=AddUserInfo(userDict,inputId);
+        if(ConfirmationMessage("izmijeniti podatke"))
+        {
+            userDict[inputId] = modifiedInfo;
+            Console.WriteLine("Uspješna izmjena podataka korisnika.\n");
+        }
+        
     }
     static void FormatedOutputType(User userDict)
     {
@@ -489,7 +513,7 @@ class Program
         Console.WriteLine("\nIspis korisnika koji imaju bar 2 putovanja\n");
         foreach (var user in userDict )
         {
-            if (user.Value.Item4.Count() >=2)
+            if (user.Value.Item4.Count>=2)
                 FormatedOutput(user);
         }   
     }
