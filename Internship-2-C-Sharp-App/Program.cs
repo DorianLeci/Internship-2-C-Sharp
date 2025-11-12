@@ -558,14 +558,15 @@ class Program
                         Console.Read();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.");
+                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.\n");
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja");
+                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.\n");
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja");
-                        TripOutput();
+                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja.\n");
+                        TripOutputSelection(userDict);
+                        TripOutputSelection(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
@@ -595,7 +596,6 @@ class Program
         var tripNew = Tuple.Create(tripId, tripInfo);
         GlobalTripList.Add(tripNew);
         Console.WriteLine("\nUspješno dodano novo putovanje.");
-        TripOutput();
     }
 
     static int TripIdInput()
@@ -666,26 +666,144 @@ class Program
         }
     }
 
-    static void TripOutput()
+    static void TripOutputSelection(User userDict)
+    {
+          while (true)
+        {
+            Console.WriteLine("1 - Ispis putovanja po redu dodavanja\n");
+            Console.WriteLine("2 - Ispis putovanja sortiranih po trošku uzlazno\n");
+            Console.WriteLine("3 - Ispis putovanja sortranih po trošku silazno\n");
+            Console.WriteLine("4 - Ispis putovanja sortranih po kilometraži uzlazno\n");
+            Console.WriteLine("5 - Ispis putovanja sortranih po kilometraži silazno\n");
+            Console.WriteLine("6 - Ispis putovanja sortranih po datumu uzlazno\n");
+            Console.WriteLine("7 - Ispis putovanja sortranih po datumu silazno\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            if (int.TryParse(Console.ReadLine(), out int outputSel))
+            {
+                switch (outputSel)
+                {
+                    case 0:
+                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.");
+                        TripMenu(userDict);
+                        return;
+                    case 1:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja po redu dodavanja.");
+                        TripOutputByOrder();
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 2:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortiranih po trošku uzlazno.");
+                        TripOutputSpend(0);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 3:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortiranih po trošku silazno.");
+                        TripOutputSpend(1);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 4:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po kilometraži uzlazno.");
+                        TripOutputDist(0);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 5:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po kilometraži silazno.");
+                        TripOutputDist(1);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 6:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po datumu uzlazno.");
+                        TripOutputDate(0);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 7:
+                        Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po datumu silazno.");
+                        TripOutputDate(1);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    default:
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
+            }
+        }      
+    }
+    static void TripOutputByOrder()
     {
         foreach (var trip in GlobalTripList)
-        {
             FormatedTripOutput(trip);
-
-        }
+            
     }
 
     static void FormatedTripOutput(Tuple<int,TripValue> trip)
     {
-        Console.WriteLine("\n---------\n");
+        Console.WriteLine("\n---------");
         Console.WriteLine("Putovanje #{0}",trip.Item1);
         Console.WriteLine("Datum: {0}-{1}-{2}",trip.Item2.Item1.Year,trip.Item2.Item1.Month,trip.Item2.Item1.Day);
-        Console.WriteLine("Kilometri: {0} L",trip.Item2.Item3);
+        Console.WriteLine("Kilometri: {0}",trip.Item2.Item2);
+        Console.WriteLine("Gorivo: {0} L",trip.Item2.Item3);
         Console.WriteLine("Cijena po litri: {0} EUR",trip.Item2.Item4);
-        Console.WriteLine("Ukupno: {0} EUR",trip.Item2.Item5);
-        Console.WriteLine("\n---------\n");
+        Console.WriteLine("Ukupno: {0:F2} EUR",trip.Item2.Item5);
+        Console.WriteLine("---------\n");
+    }
+    static void TripOutputSpend(int sortDir)
+    {
+        if (sortDir == 0)
+        {
+            var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item5);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);
+        }
+        else if (sortDir == 1)
+        {
+            var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item5);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);            
+        }
+    }
+    static void TripOutputDist(int sortDir)
+    {
+        if (sortDir == 0)
+        {
+            var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item2);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);
+        }
+        else if (sortDir == 1)
+        {
+            var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item2);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);            
+        }
+    }
+    static void TripOutputDate(int sortDir)
+    {
+        if (sortDir == 0)
+        {
+            var listSorted = GlobalTripList.OrderBy(trip => trip.Item2.Item1);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);
+        }
+        else if (sortDir == 1)
+        {
+            var listSorted = GlobalTripList.OrderByDescending(trip => trip.Item2.Item1);
+            foreach (var trip in listSorted)
+                FormatedTripOutput(trip);            
+        }
     }
 }
+
 
 
 
