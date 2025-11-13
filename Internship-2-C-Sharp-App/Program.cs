@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Runtime.InteropServices.JavaScript;
 using System.Security.Cryptography;
 
@@ -232,9 +233,9 @@ class Program
 
     static DateOnly DateCheck()
     {
-        if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputBirthDate) &&
-            inputBirthDate.ToDateTime(new TimeOnly()).Date <= DateTime.Now.Date)
-            return inputBirthDate;
+        if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputDate) &&
+            inputDate.ToDateTime(new TimeOnly()).Date <= DateTime.Now.Date)
+            return inputDate;
         return DateOnly.MaxValue;
     }
 
@@ -291,7 +292,9 @@ class Program
         {
             if (messageType == "putovanje")
                 Console.WriteLine("Unesi id korisnika kojem želiš dodati {0}", messageType);
-            else Console.WriteLine("Unesi id korisnika kojeg želiš {0}", messageType);
+            else if(messageType=="obrisati") Console.WriteLine("Unesi id korisnika kojeg želiš {0}", messageType);
+            else if(messageType=="izvještaj") Console.WriteLine("Unesi id korisnika za kojeg želiš {0} ", messageType);
+            
             if (int.TryParse(Console.ReadLine(), out int inputId) && userDict.ContainsKey(inputId))
             {
                 return inputId;
@@ -566,12 +569,12 @@ class Program
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih putovanja.\n");
                         TripOutputSelection(userDict);
-                        TripOutputSelection(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
                     case 5:
                         Console.WriteLine("Uspješan odabir.Izvještaji i analize");
+                        ReportAnalysisSelection(userDict);
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -637,7 +640,7 @@ class Program
             if (dateChecked != DateOnly.MaxValue)
                 return dateChecked;
 
-            Console.WriteLine("\nPogrešan unos datuma rođenja.");
+            Console.WriteLine("\nPogrešan unos datuma putovanja.");
         }
     }
 
@@ -802,8 +805,144 @@ class Program
                 FormattedTripOutput(trip);            
         }
     }
+
+    static void ReportAnalysisSelection(User userDict)
+    {
+        
+        var inputId = InputValidUserId(userDict, "izvještaj");
+        while (true)
+        {
+            Console.WriteLine("1 - Ukupna potrošnja goriva\n");
+            Console.WriteLine("2 - Ukupni troškovi goriva\n");
+            Console.WriteLine("3 - Prosječna potrošnja goriva u L/100km\n");
+            Console.WriteLine("4 - Putovanje s najvećom potrošnjom goriva\n");
+            Console.WriteLine("5 - Pregled putovanja po određenom datumu\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            if (int.TryParse(Console.ReadLine(), out int outputSel))
+            {
+                switch (outputSel)
+                {
+                    case 0:
+                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.");
+                        TripMenu(userDict);
+                        return;
+                    case 1:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupnu potršnju goriva.");
+                        double sum1=TotalPetrolUsed(userDict[inputId].Item4);
+                        Console.WriteLine("Ukupna potrošnja goriva: {0:F2} L\n",sum1);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 2:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupne troškove goriva.");
+                        double sum2=TotalSpend(userDict[inputId].Item4);
+                        Console.WriteLine("Ukupni troškovi goriva: {0:F2} EUR\n",sum2);  
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 3:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za prosječnu potrošnja goriva u L/100km.");
+                        double avg=AvgSpend(userDict[inputId].Item4);
+                        Console.WriteLine("Prosječna potrošnja goriva: {0:F2} L/100km",avg);     
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 4:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za putovanje s najvećom potrošnjom goriva.");
+                        MaxPetrolUsed(userDict[inputId].Item4);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 5:
+                        Console.WriteLine("Uspješan odabir.Pregled putovanja po određenom datumu.");
+                        var inputDate=TripDateSearch(userDict[inputId].Item4);
+                        TripDateReport(userDict[inputId].Item4, inputDate);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    default:
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
+            }
+        }             
+    }
+
+    static double TotalPetrolUsed(Trip userTripDict)
+    {
+        var sum = 0.0;
+        foreach (var trip in userTripDict)
+            sum += trip.Value.Item3;
+        return sum;
+    }
+
+    static double TotalSpend(Trip userTripDict)
+    {
+        var sum = 0.0;
+        foreach (var trip in userTripDict)
+            sum += trip.Value.Item5;
+        return sum;
+    }
+
+
+    static double AvgSpend(Trip userTripDict)
+    {
+        double totPetrol = TotalPetrolUsed(userTripDict);
+        double totDist= TotalDist(userTripDict);
+        double avg=(totPetrol/totDist)*100;
+        return avg;
+    }
+
+    static double TotalDist(Trip userTripDict)
+    {
+        var sum = 0.0;
+        foreach (var trip in userTripDict)
+            sum += trip.Value.Item2;
+        return sum;
+    }
+
+    static void MaxPetrolUsed(Trip userTripDict)
+    {
+        var max=userTripDict.Max(trip => trip.Value.Item3);
+        var filtrated = userTripDict.Where(trip => trip.Value.Item3 >= max);
+
+        foreach (var trip in filtrated)
+            FormattedTripOutput(Tuple.Create(trip.Key,trip.Value));
+    }
+
+    static void TripDateReport(Trip userTripDict, DateOnly inputDate)
+    {
+        var filtrated=userTripDict.Where(trip => trip.Value.Item1 == inputDate);
+        foreach (var trip in filtrated)
+            FormattedTripOutput(Tuple.Create(trip.Key,trip.Value));
+    }
+    static DateOnly TripDateSearch(Trip userTripDict)
+    {
+        while (true)
+        {
+            Console.WriteLine("Unesi datum putovanja (YYYY-MM-DD)");
+            Console.WriteLine("Ispis svih datuma\n");
+            Console.Write("[ ");
+            foreach (var trip in userTripDict)
+            {
+                Console.Write("{0} - {1} - {2},",trip.Value.Item1.Year,trip.Value.Item1.Month,trip.Value.Item1.Day);
+            }
+            Console.Write("]\n");
+            var dateChecked = DateCheck();
+            if (dateChecked != DateOnly.MaxValue && userTripDict.Any(trip => trip.Value.Item1 == dateChecked))
+                return dateChecked;
+
+            else if(dateChecked==DateOnly.MaxValue)
+                Console.WriteLine("\nPogrešan unos datuma putovanja.");
+            else Console.WriteLine("\nNepostojeći datum.");
+        }
+    }
 }
 
-
+    
 
 
