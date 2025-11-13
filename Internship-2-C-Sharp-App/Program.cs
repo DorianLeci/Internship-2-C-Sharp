@@ -391,7 +391,7 @@ class Program
 
     static void UserDelConfirm(User userDict, string[] userSelection)
     {
-        if (ConfirmationMessage("obrisati"))
+        if (ConfirmationMessage("obrisati korisnika"))
         {
             foreach (var id in userSelection)
             {
@@ -407,7 +407,7 @@ class Program
     static bool ConfirmationMessage(string messageType)
     {
         Console.WriteLine(
-            "\nŽeliš li zaista {0} korisnika -- y/n. Ako je unos krajnjeg odabira neispravan ili je odabir 'n' operacija se obustavlja.\n",
+            "\nŽeliš li zaista {0}  -- y/n. Ako je unos krajnjeg odabira neispravan ili je odabir 'n' operacija se obustavlja.\n",
             messageType);
         if (char.TryParse(Console.ReadLine()?.Trim().ToLower(), out char inputChar) && inputChar == 'y')
             return true;
@@ -597,6 +597,7 @@ class Program
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Brisanje putovanja.\n");
+                        DeleteTrip(userDict);
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.\n");
@@ -748,7 +749,6 @@ class Program
     {
             while (true)
             {
-                if (message == "izmijeniti")
                     Console.WriteLine("Unesi id putovanja kojeg želiš {0}", message);
                 
                 if (int.TryParse(Console.ReadLine(), out int inputId) && GlobalTripList.Any(trip => trip.Item1 == inputId))
@@ -1029,6 +1029,64 @@ class Program
                 Console.WriteLine("\nPogrešan unos datuma putovanja.");
             else Console.WriteLine("\nNepostojeći datum.");
         }
+    }
+
+    static void DeleteTrip(User userDict)
+    {
+        while (true)
+        {
+            Console.WriteLine("1 - Brisanje putovanja po id-u\n");
+            Console.WriteLine("2 - Brisanje svih putovanja skupljih od unesenog iznosa\n");
+            Console.WriteLine("3 - Brisanje svih putovanja jefitinijih od unesenog iznosa\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            if (int.TryParse(Console.ReadLine(), out int outputSel))
+            {
+                switch (outputSel)
+                {
+                    case 0:
+                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.");
+                        TripMenu(userDict);
+                        return;
+                    case 1:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupnu potršnju goriva.");
+                        DeleteTripById(userDict);
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 2:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupne troškove goriva.");
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    case 3:
+                        Console.WriteLine("Uspješan odabir.Izvještaj za prosječnu potrošnja goriva u L/100km.");
+                        Console.WriteLine("...Čeka se any key od korisnika...");
+                        Console.Read();
+                        break;
+                    default:
+                        Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
+            }
+        }             
+    }
+
+    static void DeleteTripById(User userDict)
+    {
+        int inputId = InputValidTripId("obrisati");              
+        if (ConfirmationMessage("obrisati putovanje"))
+        {
+            var user = userDict.FirstOrDefault(user => user.Value.Item4.ContainsKey(inputId));
+            var userId = user.Key;
+            var selectedTripId = GlobalTripList.FindIndex(trip => trip.Item1 == inputId);
+            GlobalTripList.RemoveAt(selectedTripId);
+            userDict[userId].Item4.Remove(inputId);
+            Console.WriteLine("Uspješno brisanje putovanja.\n");
+        }      
     }
 }
 
