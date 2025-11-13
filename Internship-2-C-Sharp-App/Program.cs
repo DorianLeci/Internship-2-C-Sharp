@@ -153,17 +153,51 @@ class Program
     static void NewUserInput(User userDict)
     {
         int id = IdInput(userDict);
-        var addedInfo = AddUserInfo(userDict, id);
+        var addedInfo = AddUserInfo(userDict, id,true);
         userDict[id] = addedInfo;
         Console.WriteLine("\nUspješno dodan novi korisnik.");
     }
 
-    static Tuple<string, string, DateOnly, Trip> AddUserInfo(User userDict, int id)
+    static Tuple<string, string, DateOnly, Trip> AddUserInfo(User userDict, int id,bool newItem)
     {
-        string name = StringInput("ime");
-        string surname = StringInput("prezime");
-        DateOnly birthDate = BirthDateInput();
-        return Tuple.Create(name, surname, birthDate, new Trip());
+        string name, surname;
+        DateOnly birthDate;
+        
+        if (AskUser("ime",newItem))
+            name = StringInput("ime");
+        else name = userDict[id].Item1;
+        
+        if (AskUser("prezime",newItem))
+            surname = StringInput("prezime");
+        else surname = userDict[id].Item2;
+        
+        if(AskUser("datum rođenja",newItem))
+            birthDate = BirthDateInput();
+        else  birthDate = userDict[id].Item3;
+        
+        
+        return (newItem) ? Tuple.Create(name, surname, birthDate, new Trip()) : Tuple.Create(name,surname,birthDate,userDict[id].Item4);
+    }
+
+    static bool AskUser(string message,bool newItem)
+    {
+        if (newItem)
+            return true;
+        
+        Console.WriteLine("\nŽeliš li unijeti {0}. y/n",message);
+        if (char.TryParse(Console.ReadLine()?.Trim().ToLower(), out char inputChar) && inputChar == 'y')
+            return true;
+        else if (inputChar == 'n')
+        {
+            Console.WriteLine("Odustao si od promjene ovog podatka.");
+            return false;
+        }
+        else
+        {
+            Console.WriteLine("\nUnos neispravan.Operacija se obustavlja.");
+            return false;
+        }
+        
     }
 
     static int IdInput(User userDict)
@@ -294,6 +328,7 @@ class Program
                 Console.WriteLine("Unesi id korisnika kojem želiš dodati {0}", messageType);
             else if(messageType=="obrisati") Console.WriteLine("Unesi id korisnika kojeg želiš {0}", messageType);
             else if(messageType=="izvještaj") Console.WriteLine("Unesi id korisnika za kojeg želiš {0} ", messageType);
+            else if(messageType=="izmijeniti") Console.WriteLine("Unesi id korisnika kojeg želiš {0} ", messageType);
             
             if (int.TryParse(Console.ReadLine(), out int inputId) && userDict.ContainsKey(inputId))
             {
@@ -374,7 +409,7 @@ class Program
         Console.WriteLine(
             "\nŽeliš li zaista {0} korisnika -- y/n. Ako je unos krajnjeg odabira neispravan ili je odabir 'n' operacija se obustavlja.\n",
             messageType);
-        if (char.TryParse(Console.ReadLine(), out char inputChar) && inputChar == 'y')
+        if (char.TryParse(Console.ReadLine()?.Trim().ToLower(), out char inputChar) && inputChar == 'y')
             return true;
         else if (inputChar == 'n')
         {
@@ -441,7 +476,7 @@ class Program
     static void ModifyUser(User userDict)
     {
         int inputId = InputValidUserId(userDict, "izmijeniti");
-        var modifiedInfo = AddUserInfo(userDict, inputId);
+        var modifiedInfo = AddUserInfo(userDict, inputId,false);
         if (ConfirmationMessage("izmijeniti podatke"))
         {
             userDict[inputId] = modifiedInfo;
@@ -565,6 +600,7 @@ class Program
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.\n");
+                        ModifyTrip(userDict);
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Pregled svih putovanja.\n");
@@ -593,9 +629,9 @@ class Program
         int userId = InputValidUserId(userDict, "putovanje");
         Console.WriteLine("Unos za korisnika na id-u: {0} imena {1}",userId,userDict[userId].Item1+" - "+userDict[userId].Item2);
         int tripId = TripIdInput();
-        var tripInfo = AddTripInfo();
+        var tripInfo = AddTripInfo(tripId,true);
         
-        userDict[userId].Item4[tripId] = tripInfo;
+        userDict[userId].Item4[tripId]= tripInfo;
         var tripNew = Tuple.Create(tripId, tripInfo);
         GlobalTripList.Add(tripNew);
         Console.WriteLine("\nUspješno dodano novo putovanje.");
@@ -620,15 +656,35 @@ class Program
         }
     }
 
-    static Tuple<DateOnly, double, double, double, double> AddTripInfo()
+    static TripValue AddTripInfo(int tripId,bool newItem )
     {
+        DateOnly tripDate;
+        double distance, petrolUsed, petrolPerLitre, netSpend;
+        Tuple<int,TripValue>? selectedTrip = null;
+        if (!newItem)
+        { 
+            selectedTrip = GlobalTripList.FirstOrDefault(trip => trip.Item1 == tripId);
+        }
+        if (AskUser("datum putovanja", newItem))
+            tripDate = TripDateInput();
+        else tripDate = selectedTrip!.Item2.Item1;
 
-        DateOnly tripDate = TripDateInput();
-        double distance = TripDoubleInput(0);
-        double petrolUsed = TripDoubleInput(1);
-        double petrolPerLitre = TripDoubleInput(2);
-        double netSpend = petrolUsed * petrolPerLitre;
-        return Tuple.Create(tripDate, distance, petrolUsed,petrolPerLitre,netSpend);
+        if (AskUser("kilometražu", newItem))
+                distance = TripDoubleInput(0);
+        else distance = selectedTrip!.Item2.Item2;
+
+        if(AskUser("gorivo",newItem))
+                petrolUsed = TripDoubleInput(1);
+        else petrolUsed = selectedTrip!.Item2.Item3;
+        
+        if(AskUser("cijenu goriva po litri",newItem))
+                petrolPerLitre = TripDoubleInput(2);
+        else petrolPerLitre = selectedTrip!.Item2.Item4;
+            
+        netSpend = petrolUsed * petrolPerLitre;
+            
+        return new TripValue(tripDate, distance, petrolUsed,petrolPerLitre,netSpend);            
+
     }
 
     static DateOnly TripDateInput()
@@ -651,7 +707,7 @@ class Program
             switch (inputCase)
             {
                 case 0:
-                    Console.WriteLine("Unesi prijeđenu kilometražu u decimalnom ili cjelobrjonom obliku,npr.243 ili 243.5");
+                    Console.WriteLine("Unesi prijeđenu kilometražu u decimalnom ili cjelobrojonom obliku,npr.243 ili 243.5");
                     break;
                 case 1:
                     Console.WriteLine("Unesi potrošeno gorivo u decimalnom ili cjelobrojnom obliku,npr. 23 ili 23.5");
@@ -665,10 +721,39 @@ class Program
 
             if (double.TryParse(Console.ReadLine(), out double inputDist) && inputDist >= 0)
                 return inputDist;
-            else Console.WriteLine("\nPogrešan unos kilometraže\n");
+            else Console.WriteLine("\nPogrešan unos.\n");
         }
     }
 
+    static void ModifyTrip(User userDict)
+    {
+        int inputId = InputValidTripId("izmijeniti");
+        var modifiedInfo = AddTripInfo(inputId,false);
+        if (ConfirmationMessage("izmijeniti podatke"))
+        {
+            var selectedTripId = GlobalTripList.FindIndex(trip => trip.Item1 == inputId);
+            GlobalTripList[selectedTripId]= Tuple.Create(inputId,modifiedInfo);
+            var user = userDict.FirstOrDefault(user => user.Value.Item4.ContainsKey(inputId));
+            var userId = user.Key;
+            userDict[userId].Item4[inputId]= modifiedInfo;
+            Console.WriteLine("Uspješna izmjena podataka za putovanje.\n");
+        }      
+    }
+
+    static int InputValidTripId(string message)
+    {
+            while (true)
+            {
+                if (message == "izmijeniti")
+                    Console.WriteLine("Unesi id putovanja kojeg želiš {0}", message);
+                
+                if (int.TryParse(Console.ReadLine(), out int inputId) && GlobalTripList.Any(trip => trip.Item1 == inputId))
+                {
+                    return inputId;
+                }
+                else Console.WriteLine("\nId putovanja je u krivom formatu ili nije pronađen.");
+            }       
+    }
     static void TripOutputSelection(User userDict)
     {
           while (true)
@@ -927,7 +1012,7 @@ class Program
             Console.WriteLine("Unesi datum putovanja (YYYY-MM-DD)");
             Console.WriteLine("Ispis svih datuma\n");
             Console.Write("[ ");
-            foreach (var trip in userTripDict)
+            foreach (var trip in userTripDict.DistinctBy(trip=>trip.Value.Item1))
             {
                 Console.Write("{0} - {1} - {2},",trip.Value.Item1.Year,trip.Value.Item1.Month,trip.Value.Item1.Day);
             }
