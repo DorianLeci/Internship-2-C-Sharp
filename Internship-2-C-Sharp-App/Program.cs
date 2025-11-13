@@ -568,7 +568,7 @@ class Program
     static void FormatedOutput(KeyValuePair<int, UserDictValue> dictElement)
     {
         Console.WriteLine("{0} - {1} - {2} - {3}\n", dictElement.Key, dictElement.Value.Item1, dictElement.Value.Item2,
-            dictElement.Value.Item3);
+            dictElement.Value.Item3.ToString("yyyy-MM-dd"));
     }
 
     static void TripMenu(User userDict)
@@ -629,7 +629,7 @@ class Program
         int userId = InputValidUserId(userDict, "putovanje");
         Console.WriteLine("Unos za korisnika na id-u: {0} imena {1}",userId,userDict[userId].Item1+" - "+userDict[userId].Item2);
         int tripId = TripIdInput();
-        var tripInfo = AddTripInfo(tripId,true);
+        var tripInfo = AddTripInfo(tripId,userId,true,userDict);
         
         userDict[userId].Item4[tripId]= tripInfo;
         var tripNew = Tuple.Create(tripId, tripInfo);
@@ -656,7 +656,7 @@ class Program
         }
     }
 
-    static TripValue AddTripInfo(int tripId,bool newItem )
+    static TripValue AddTripInfo(int tripId,int userId,bool newItem,User userDict)
     {
         DateOnly tripDate;
         double distance, petrolUsed, petrolPerLitre, netSpend;
@@ -666,7 +666,7 @@ class Program
             selectedTrip = GlobalTripList.FirstOrDefault(trip => trip.Item1 == tripId);
         }
         if (AskUser("datum putovanja", newItem))
-            tripDate = TripDateInput();
+            tripDate = TripDateInput(userDict,userId);
         else tripDate = selectedTrip!.Item2.Item1;
 
         if (AskUser("kilometražu", newItem))
@@ -687,16 +687,20 @@ class Program
 
     }
 
-    static DateOnly TripDateInput()
+    static DateOnly TripDateInput(User userDict,int userId)
     {
         while (true)
         {
             Console.WriteLine("Unesi datum putovanja (YYYY-MM-DD)");
             var dateChecked = DateCheck();
-            if (dateChecked != DateOnly.MaxValue)
+            if (dateChecked != DateOnly.MaxValue && dateChecked>=userDict[userId].Item3)
                 return dateChecked;
 
-            Console.WriteLine("\nPogrešan unos datuma putovanja.");
+            else if(dateChecked!=DateOnly.MaxValue)
+                Console.WriteLine("\nPogrešan unos datuma putovanja.Datum ne može biti noviji od današnjeg.");
+            else if(dateChecked>=userDict[userId].Item3)
+                Console.WriteLine("\nPogrešan unos datuma putovanja.Datum ne može biti stariji od datuma rođenja korisnika ( {0} )",
+                    userDict[userId].Item3.ToString("yyyy-MM-dd"));               
         }
     }
 
@@ -728,13 +732,13 @@ class Program
     static void ModifyTrip(User userDict)
     {
         int inputId = InputValidTripId("izmijeniti");
-        var modifiedInfo = AddTripInfo(inputId,false);
+        var user = userDict.FirstOrDefault(user => user.Value.Item4.ContainsKey(inputId));
+        var userId = user.Key;
+        var modifiedInfo = AddTripInfo(inputId,userId,false,userDict);
         if (ConfirmationMessage("izmijeniti podatke"))
         {
             var selectedTripId = GlobalTripList.FindIndex(trip => trip.Item1 == inputId);
             GlobalTripList[selectedTripId]= Tuple.Create(inputId,modifiedInfo);
-            var user = userDict.FirstOrDefault(user => user.Value.Item4.ContainsKey(inputId));
-            var userId = user.Key;
             userDict[userId].Item4[inputId]= modifiedInfo;
             Console.WriteLine("Uspješna izmjena podataka za putovanje.\n");
         }      
@@ -838,7 +842,7 @@ class Program
     {
         Console.WriteLine("\n---------");
         Console.WriteLine("Putovanje #{0}",trip.Item1);
-        Console.WriteLine("Datum: {0}-{1}-{2}",trip.Item2.Item1.Year,trip.Item2.Item1.Month,trip.Item2.Item1.Day);
+        Console.WriteLine("Datum: {0}",trip.Item2.Item1.ToString("yyyy-MM-dd"));
         Console.WriteLine("Kilometri: {0}",trip.Item2.Item2);
         Console.WriteLine("Gorivo: {0} L",trip.Item2.Item3);
         Console.WriteLine("Cijena po litri: {0} EUR",trip.Item2.Item4);
