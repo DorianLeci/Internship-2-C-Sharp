@@ -720,12 +720,15 @@ class Program
                 case 2:
                     Console.WriteLine("Unesi cijenu goriva po litri u decimalnom ili cjelobrojnom obliku,npr 1 ili 1.49");
                     break;
+                case 3:
+                    Console.WriteLine("Unesi ukupni trošak nekog putovanja u EUR.");
+                    break;
                 default:
                     break;
             }
 
-            if (double.TryParse(Console.ReadLine(), out double inputDist) && inputDist >= 0)
-                return inputDist;
+            if (double.TryParse(Console.ReadLine(), out double input) && input >= 0)
+                return input;
             else Console.WriteLine("\nPogrešan unos.\n");
         }
     }
@@ -944,8 +947,12 @@ class Program
                         break;
                     case 5:
                         Console.WriteLine("Uspješan odabir.Pregled putovanja po određenom datumu.");
-                        var inputDate=TripDateSearch(userDict[inputId].Item4);
-                        TripDateReport(userDict[inputId].Item4, inputDate);
+                        if (userDict[inputId].Item4.Count > 0)
+                        {
+                            var inputDate=TripDateSearch(userDict[inputId].Item4);
+                            TripDateReport(userDict[inputId].Item4, inputDate);                            
+                        }
+                        else Console.WriteLine("Popis putovanja ovog korisnika je prazan.");
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
@@ -996,11 +1003,19 @@ class Program
 
     static void MaxPetrolUsed(Trip userTripDict)
     {
-        var max=userTripDict.Max(trip => trip.Value.Item3);
-        var filtrated = userTripDict.Where(trip => trip.Value.Item3 >= max);
 
-        foreach (var trip in filtrated)
-            FormattedTripOutput(Tuple.Create(trip.Key,trip.Value));
+        try
+        {
+            var max = userTripDict.Max(trip => trip.Value.Item3);
+            var filtrated = userTripDict.Where(trip => trip.Value.Item3 >= max);
+
+            foreach (var trip in filtrated)
+                FormattedTripOutput(Tuple.Create(trip.Key, trip.Value));
+        }
+        catch (InvalidOperationException)
+        {
+            Console.WriteLine("Putovanje s najvećom potrošnjom goriva ne postoji jer je lista putovanja prazna.");
+        }
     }
 
     static void TripDateReport(Trip userTripDict, DateOnly inputDate)
@@ -1048,18 +1063,20 @@ class Program
                         TripMenu(userDict);
                         return;
                     case 1:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupnu potršnju goriva.");
+                        Console.WriteLine("Uspješan odabir.Brisanje putovanja po id-u.");
                         DeleteTripById(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupne troškove goriva.");
+                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja skupljih od unesenog iznosa.");
+                        DeleteTripByTotSpend(userDict,0);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za prosječnu potrošnja goriva u L/100km.");
+                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja jeftinijih od unesenog iznosa.");
+                        DeleteTripByTotSpend(userDict,1);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
                         break;
@@ -1087,6 +1104,40 @@ class Program
             userDict[userId].Item4.Remove(inputId);
             Console.WriteLine("Uspješno brisanje putovanja.\n");
         }      
+    }
+
+    static void DeleteTripByTotSpend(User userDict,int spendDirection)
+    {
+        double inputSpend = TripDoubleInput(3);
+        int removed = 0;
+        if (ConfirmationMessage("obrisati putovanja skuplja od unesenog iznosa"))
+        {
+            if (spendDirection == 0)
+            {
+                var delTripIdEnum = GlobalTripList.Where(trip=>trip.Item2.Item5>inputSpend).Select(trip=>trip.Item1);
+                var delTripIdList=delTripIdEnum.ToList();
+                removed=GlobalTripList.RemoveAll(trip=>trip.Item2.Item5>inputSpend);             
+                RemoveFromDict(userDict,delTripIdList);
+            }
+            
+            else if (spendDirection == 1)
+            {
+                var delTripIdEnum = GlobalTripList.Where(trip=>trip.Item2.Item5<inputSpend).Select(trip=>trip.Item1);
+                var delTripIdList=delTripIdEnum.ToList();  
+                removed=GlobalTripList.RemoveAll(trip=>trip.Item2.Item5<inputSpend);  
+                RemoveFromDict(userDict,delTripIdList);
+            }
+
+            Console.WriteLine("Uspješno brisanje {0} putovanja.\n",removed);
+        }        
+    }
+
+    static void RemoveFromDict(User userDict,List<int>idList)
+    {
+        foreach (var userId in userDict.Keys)
+        foreach (var trip in userDict[userId].Item4)
+            if (idList.Contains(trip.Key))
+                userDict[userId].Item4.Remove(trip.Key);       
     }
 }
 
