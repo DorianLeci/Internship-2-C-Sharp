@@ -370,7 +370,9 @@ class Program
 
         if (ConfirmationMessage("obrisati"))
         {
+            var userTripKeys = userDict[inputId].Item4.Keys;
             userDict.Remove(inputId);
+            GlobalTripList.RemoveAll(trip => userTripKeys.Contains(trip.Item1));
             Console.WriteLine("Uspješno brisanje korisnika.\n");
         }
 
@@ -452,7 +454,12 @@ class Program
             foreach (var id in userSelection)
             {
                 if (int.TryParse(id, out int parsedId))
+                {
+                    var userTripKeys = userDict[parsedId].Item4.Keys;
                     userDict.Remove(parsedId);
+                    GlobalTripList.RemoveAll(trip => userTripKeys.Contains(trip.Item1));
+                }
+
             }
 
 
@@ -487,9 +494,11 @@ class Program
         foundUsersIdList.Sort();
         while (true)
         {
+            Console.WriteLine("-------------");
             Console.WriteLine("\nPostoji {0} korisnik(a) s istim imenom i prezimenom:{1}\n", foundUsersIdList.Count,
                 inputFormatted);
             IdListOutput(foundUsersIdList);
+            Console.WriteLine("-------------\n");
             Console.WriteLine("Unesi sve korisnike koje želiš obrisati u formatu (id1 id2 id3..)\n");
 
             string? inputIdList = Console.ReadLine();
@@ -549,7 +558,7 @@ class Program
             Console.WriteLine("----------------------");
             Console.WriteLine("1- Ispis korisnika sortiranih abecedno po prezimenu\n");
             Console.WriteLine("2 - Ispis korisnika starijih od 20 godina\n");
-            Console.WriteLine("3- Ispis korisnika koji imaju bar 2 putovanja");
+            Console.WriteLine("3- Ispis korisnika koji imaju bar 2 putovanja\n");
             Console.WriteLine("0- povratak na korisnicki izbornik\n");
             Console.WriteLine("----------------------\n");
             if (int.TryParse(Console.ReadLine(), out int inputNumber))
@@ -870,44 +879,44 @@ class Program
                     case 1:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja po redu dodavanja.");
                         TripOutputByOrder();
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 2:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortiranih po trošku uzlazno.");
                         TripOutputSpend(0);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 3:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortiranih po trošku silazno.");
                         TripOutputSpend(1);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 4:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po kilometraži uzlazno.");
                         TripOutputDist(0);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        
+                        WaitingForUser();
                         break;
                     case 5:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po kilometraži silazno.");
                         TripOutputDist(1);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 6:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po datumu uzlazno.");
                         TripOutputDate(0);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 7:
                         Console.WriteLine("Uspješan odabir.Ispis putovanja sortranih po datumu silazno.");
                         TripOutputDate(1);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -989,6 +998,11 @@ class Program
         var inputId = InputValidUserId(userDict, "izvještaj");
         while (true)
         {
+            if (userDict[inputId].Item4.Count == 0)
+            {
+                Console.WriteLine("Odabrani korisnik nema niti jedno putovanje.Vrati se na izbornik putovanja.");
+                return;
+            }
             Console.WriteLine("----------------------");         
             Console.WriteLine("1 - Ukupna potrošnja goriva\n");
             Console.WriteLine("2 - Ukupni troškovi goriva\n");
@@ -1120,7 +1134,7 @@ class Program
             Console.Write("[ ");
             foreach (var trip in userTripDict.DistinctBy(trip=>trip.Value.Item1))
             {
-                Console.Write("{0} - {1} - {2},",trip.Value.Item1.Year,trip.Value.Item1.Month,trip.Value.Item1.Day);
+                Console.Write("{0} - {1} - {2}||",trip.Value.Item1.Year,trip.Value.Item1.Month,trip.Value.Item1.Day);
             }
             Console.Write("]\n");
             var dateChecked = DateCheck();
