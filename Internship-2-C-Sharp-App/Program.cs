@@ -830,9 +830,9 @@ class Program
                     break;
             }
 
-            if (double.TryParse(Console.ReadLine(), out double input) && input >= 0)
+            if (double.TryParse(Console.ReadLine(), out double input) && input > 0)
                 return input;
-            else Console.WriteLine("\nPogrešan unos.\n");
+            else Console.WriteLine("Pogrešan unos.\n");
         }
     }
 
@@ -1303,6 +1303,13 @@ class Program
                         
                         WaitingForUser();
                         break;
+                    case 4:
+                        Console.WriteLine("Uspješan odabir.Ispis ukupnog broja prijeđenih kilometara svih korisnika.\n");
+                        TotalUsersDist(userDict);
+                        
+                        WaitingForUser();
+                        break;
+
                     default:
                         Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno");
                         break;
@@ -1321,7 +1328,7 @@ class Program
         var maxPair=userDict.MaxBy(user=>TotalSpend(user.Value.Item4));
         var maxPairTotal = TotalSpend(maxPair.Value.Item4);
         var usersMax = userDict.Where(user=>Math.Abs(TotalSpend(user.Value.Item4) - maxPairTotal) < epsilon);
-        Console.WriteLine("Najveći ukupni trošak goriva iznosi: {0:F6}.\n",maxPairTotal);
+        Console.WriteLine("Najveći ukupni trošak goriva iznosi: {0:F6} EUR.\n",maxPairTotal);
         Console.WriteLine("----------------------");
         foreach (var user in usersMax)
             FormatedOutput(user);
@@ -1345,6 +1352,18 @@ class Program
         var tripCount = userDict.Values.Aggregate(0,(acc,usrValue) => usrValue.Item4.Count + acc);
         var userCount = userDict.Count;
         Console.WriteLine("Prosječni broj putovanja po korisniku je: {0}",(float)tripCount/userCount);
+    }
+
+    static void TotalUsersDist(User userDict)
+    {
+        double sum = 0.0;    
+        foreach (var user in userDict)
+        {
+            var trip=user.Value.Item4;
+            sum += TotalDist(trip);
+        }
+
+        Console.WriteLine("Ukupan broj prijeđenih kilometara svih korisnika je: {0} km.\n",sum);
     }
 }
 
