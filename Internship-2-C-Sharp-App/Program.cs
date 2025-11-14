@@ -306,7 +306,20 @@ class Program
             return inputDate;
         return DateOnly.MaxValue;
     }
-
+    static DateOnly TripDateCheck(User userDict,int userId)
+    {
+        if (DateOnly.TryParse(Console.ReadLine(), out DateOnly inputDate) &&
+            (inputDate.ToDateTime(new TimeOnly()).Date <= DateTime.Now.Date)
+            && (inputDate>=userDict[userId].Item3) )
+            return inputDate;
+        else if(inputDate.ToDateTime(new TimeOnly()).Date > DateTime.Now.Date)
+            Console.WriteLine("Pogrešan unos datuma putovanja.Datum ne može biti noviji od današnjeg.\n");
+        else if(inputDate<userDict[userId].Item3)
+            Console.WriteLine("\nPogrešan unos datuma putovanja.Datum ne može biti stariji od datuma rođenja korisnika ( {0} )",
+                userDict[userId].Item3.ToString("yyyy-MM-dd"));       
+        
+        return DateOnly.MaxValue;
+    }
     static void UserDelete(User userDict)
     {
         while (true)
@@ -699,17 +712,11 @@ class Program
 
     static bool TripExists()
     {
-        return GlobalTripList.Count == 0;
+        return GlobalTripList.Count != 0;
     }
     static void NewTripInput(User userDict)
     {
-        if (userDict.Count == 0)
-        {
-            Console.WriteLine("Ne postoji više niti jedan korisnik za kojega možeš unijeti novo putovanje.");
-            Console.WriteLine("...Čeka se any key od korisnika...");
-            Console.Read();
-            return;
-        }
+
         int userId = InputValidUserId(userDict, "putovanje");
         Console.WriteLine("Unos za korisnika na id-u: {0} imena {1}",userId,userDict[userId].Item1+" - "+userDict[userId].Item2);
         int tripId = TripIdInput();
@@ -776,15 +783,9 @@ class Program
         while (true)
         {
             Console.WriteLine("Unesi datum putovanja (YYYY-MM-DD)");
-            var dateChecked = DateCheck();
-            if (dateChecked != DateOnly.MaxValue && dateChecked>=userDict[userId].Item3)
+            var dateChecked = TripDateCheck(userDict,userId);
+            if (dateChecked != DateOnly.MaxValue)
                 return dateChecked;
-
-            else if(dateChecked!=DateOnly.MaxValue)
-                Console.WriteLine("\nPogrešan unos datuma putovanja.Datum ne može biti noviji od današnjeg.");
-            else if(dateChecked>=userDict[userId].Item3)
-                Console.WriteLine("\nPogrešan unos datuma putovanja.Datum ne može biti stariji od datuma rođenja korisnika ( {0} )",
-                    userDict[userId].Item3.ToString("yyyy-MM-dd"));               
         }
     }
 
