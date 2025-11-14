@@ -7,6 +7,7 @@ Steps to install the project:
 
 ```
 git clone https://github.com/DorianLeci/Internship-2-C-Sharp.git
+cd Internship-2-C-Sharp
 cd Internship-2-C-Sharp-App
 dotnet run
 ```
