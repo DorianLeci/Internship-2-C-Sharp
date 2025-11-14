@@ -68,22 +68,31 @@ class Program
     {
         while (true)
         {
-            Console.WriteLine("1 - Korisnici\n2 - Putovanja\n0 - Izlaz iz aplikacije\n");
+            Console.WriteLine("----------------------");
+            Console.WriteLine("1 - Korisnici\n");
+            Console.WriteLine("2 - Putovanja\n");
+            Console.WriteLine("0 - Izlaz iz aplikacije");
+            Console.WriteLine("----------------------\n");
             if (int.TryParse(Console.ReadLine(), out int inputMainMenu))
             {
                 switch (inputMainMenu)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.izlaz iz aplikacije\n");
+                        Console.WriteLine("Uspješan odabir.Izlaz iz aplikacije\n");
                         Environment.Exit(0);
                         break;
                     case 1:
-                        Console.WriteLine("Uspješan odabir menija za korisnike.\n");
+                        Console.WriteLine("Uspješan odabir izbornika za korisnike.\n");
                         UserMenu(userDict);
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir menija za putovanja.\n");
-                        TripMenu(userDict);
+                        if (UserExists(userDict))
+                        {
+                            Console.WriteLine("Uspješan odabir izbornika za putovanja.\n");
+                            TripMenu(userDict);                           
+                        }
+                        else Console.WriteLine("Ne postoji niti jedan korisnik.Dodaj barem jednog kako bi mogao pristupiti ovom izborniku.");
+
                         break;
                     default:
                         Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno");
@@ -119,8 +128,8 @@ class Program
                     case 1:
                         Console.WriteLine("Uspješan odabir.Unos novog korisnika\n");
                         NewUserInput(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 2:
                         if (UserExists(userDict))
@@ -302,16 +311,17 @@ class Program
     {
         while (true)
         {
+            if (!UserExists(userDict))
+            {
+                Console.WriteLine("Ne postoji niti jedan korisnik kojeg možeš obrisati.Vrati se na izbornik za korisnike.\n");
+                return;
+            }
             Console.WriteLine("----------------------");
             Console.WriteLine("1 - Brisanje korisnika po id-u\n");
             Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu\n");
             Console.WriteLine("0 - Povratak na korisnicki izbornik");
             Console.WriteLine("----------------------\n");
-            if (!UserExists(userDict))
-            {
-                Console.WriteLine("Ne postoji niti jedan korisnik kojeg možeš obrisati.\n");
-                return;
-            }
+
             if (int.TryParse(Console.ReadLine(), out int inputNumber))
             {
                 switch (inputNumber)
@@ -614,43 +624,66 @@ class Program
     {
         while (true)
         {
+            Console.WriteLine("----------------------");            
             Console.WriteLine("1 - Unos novog putovanja\n");
             Console.WriteLine("2 - Brisanje putovanja\n");
             Console.WriteLine("3 - Uređivanje postojećeg putovanja\n");
             Console.WriteLine("4 - Pregled svih putovanja\n");
             Console.WriteLine("5 - Izvještaji i analize\n");
-            Console.WriteLine("0 - Povratak na glavni izbornik\n");
+            Console.WriteLine("0 - Povratak na glavni izbornik");
+            Console.WriteLine("----------------------\n");         
             if (int.TryParse(Console.ReadLine(), out int inputTripMenu))
             {
                 switch (inputTripMenu)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik.");
+                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik.\n");
                         MainMenu(userDict);
                         return;
                     case 1:
-                        Console.WriteLine("Uspješan odabir.Unos novog putovanja.");
+                        Console.WriteLine("Uspješan odabir.Unos novog putovanja.\n");
                         NewTripInput(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.");
-                        DeleteTrip(userDict);
+                        if (TripExists())
+                        {
+                            Console.WriteLine("Uspješan odabir.Brisanje putovanja.\n");
+                            DeleteTrip(userDict);                            
+                        }
+                        else Console.WriteLine("Ne postoji niti jedno putovanje koje možeš obrisati.\n");
+                        
+                        WaitingForUser();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.");
-                        ModifyTrip(userDict);
+                        if (TripExists()){
+                            Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.\n");
+                            ModifyTrip(userDict);                       
+                        }
+                        else Console.WriteLine("Ne postoji niti jedno putovanje koje možeš izmijeniti.\n");
+                        
+                        WaitingForUser();
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja.");
-                        TripOutputSelection(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        if (TripExists())
+                        {
+                            Console.WriteLine("Uspješan odabir.Pregled svih putovanja.\n");
+                            TripOutputSelection(userDict);                            
+                        }
+                        else Console.WriteLine("Ne postoji niti jedno putovanje koje možeš prikazati.\n");
+                        
+                        WaitingForUser();
                         break;
                     case 5:
-                        Console.WriteLine("Uspješan odabir.Izvještaji i analize");
-                        ReportAnalysisSelection(userDict);
+                        if (TripExists())
+                        {
+                            Console.WriteLine("Uspješan odabir.Izvještaji i analiza.\n");
+                            ReportAnalysisSelection(userDict);                           
+                        }
+                        else Console.WriteLine("Ne postoji niti jedno putovanje za izvještaj i analizu.\n");   
+                        
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -664,6 +697,10 @@ class Program
         }
     }
 
+    static bool TripExists()
+    {
+        return GlobalTripList.Count == 0;
+    }
     static void NewTripInput(User userDict)
     {
         if (userDict.Count == 0)
@@ -811,6 +848,7 @@ class Program
     {
           while (true)
         {
+            Console.WriteLine("----------------------");         
             Console.WriteLine("1 - Ispis putovanja po redu dodavanja\n");
             Console.WriteLine("2 - Ispis putovanja sortiranih po trošku uzlazno\n");
             Console.WriteLine("3 - Ispis putovanja sortranih po trošku silazno\n");
@@ -818,7 +856,8 @@ class Program
             Console.WriteLine("5 - Ispis putovanja sortranih po kilometraži silazno\n");
             Console.WriteLine("6 - Ispis putovanja sortranih po datumu uzlazno\n");
             Console.WriteLine("7 - Ispis putovanja sortranih po datumu silazno\n");
-            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja");
+            Console.WriteLine("----------------------\n");         
             if (int.TryParse(Console.ReadLine(), out int outputSel))
             {
                 switch (outputSel)
@@ -949,57 +988,59 @@ class Program
         var inputId = InputValidUserId(userDict, "izvještaj");
         while (true)
         {
+            Console.WriteLine("----------------------");         
             Console.WriteLine("1 - Ukupna potrošnja goriva\n");
             Console.WriteLine("2 - Ukupni troškovi goriva\n");
             Console.WriteLine("3 - Prosječna potrošnja goriva u L/100km\n");
             Console.WriteLine("4 - Putovanje s najvećom potrošnjom goriva\n");
             Console.WriteLine("5 - Pregled putovanja po određenom datumu\n");
-            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja");
+            Console.WriteLine("----------------------\n");         
             if (int.TryParse(Console.ReadLine(), out int outputSel))
             {
                 switch (outputSel)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.");
+                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.\n");
                         TripMenu(userDict);
                         return;
                     case 1:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupnu potršnju goriva.");
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupnu potršnju goriva.\n");
                         double sum1=TotalPetrolUsed(userDict[inputId].Item4);
                         Console.WriteLine("Ukupna potrošnja goriva: {0:F2} L\n",sum1);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        
+                        WaitingForUser();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupne troškove goriva.");
+                        Console.WriteLine("Uspješan odabir.Izvještaj za ukupne troškove goriva.\n");
                         double sum2=TotalSpend(userDict[inputId].Item4);
                         Console.WriteLine("Ukupni troškovi goriva: {0:F2} EUR\n",sum2);  
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                    
+                        WaitingForUser();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za prosječnu potrošnja goriva u L/100km.");
+                        Console.WriteLine("Uspješan odabir.Izvještaj za prosječnu potrošnja goriva u L/100km.\n");
                         double avg=AvgSpend(userDict[inputId].Item4);
                         Console.WriteLine("Prosječna potrošnja goriva: {0:F2} L/100km",avg);     
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Izvještaj za putovanje s najvećom potrošnjom goriva.");
+                        Console.WriteLine("Uspješan odabir.Izvještaj za putovanje s najvećom potrošnjom goriva.\n");
                         MaxPetrolUsed(userDict[inputId].Item4);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     case 5:
-                        Console.WriteLine("Uspješan odabir.Pregled putovanja po određenom datumu.");
+                        Console.WriteLine("Uspješan odabir.Pregled putovanja po određenom datumu.\n");
                         if (userDict[inputId].Item4.Count > 0)
                         {
                             var inputDate=TripDateSearch(userDict[inputId].Item4);
                             TripDateReport(userDict[inputId].Item4, inputDate);                            
                         }
                         else Console.WriteLine("Popis putovanja ovog korisnika je prazan.");
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -1095,42 +1136,42 @@ class Program
     {
         while (true)
         {
-            if (GlobalTripList.Count == 0)
+            if (!TripExists())
             {
-                Console.WriteLine("Ne postoji više niti jedno putovanje koje možeš obrisati.");
-                Console.WriteLine("...Čeka se any key od korisnika...");
-                Console.Read();
+                Console.WriteLine("Ne postoji niti jedno putovanje koje možeš obrisati.\n");
                 return;
             }
+            Console.WriteLine("----------------------");         
             Console.WriteLine("1 - Brisanje putovanja po id-u\n");
             Console.WriteLine("2 - Brisanje svih putovanja skupljih od unesenog iznosa\n");
             Console.WriteLine("3 - Brisanje svih putovanja jefitinijih od unesenog iznosa\n");
-            Console.WriteLine("0 - Povratak na izbornik putovanja\n");
+            Console.WriteLine("0 - Povratak na izbornik putovanja");
+            Console.WriteLine("----------------------\n");         
             if (int.TryParse(Console.ReadLine(), out int outputSel))
             {
                 switch (outputSel)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.");
+                        Console.WriteLine("Uspješan odabir.Povratak na izbornik putovanja.\n");
                         TripMenu(userDict);
                         return;
                     case 1:
-                        Console.WriteLine("Uspješan odabir.Brisanje putovanja po id-u.");
+                        Console.WriteLine("Uspješan odabir.Brisanje putovanja po id-u.\n");
                         DeleteTripById(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        
+                        WaitingForUser();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja skupljih od unesenog iznosa.");
-                        DeleteTripByTotSpend(userDict,0);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja skupljih od unesenog iznosa.\n");
+                        DeleteTripByTotSpend(userDict,0);            
+                        
+                        WaitingForUser();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja jeftinijih od unesenog iznosa.");
+                        Console.WriteLine("Uspješan odabir.Brisanje svih putovanja jeftinijih od unesenog iznosa.\n");
                         DeleteTripByTotSpend(userDict,1);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
