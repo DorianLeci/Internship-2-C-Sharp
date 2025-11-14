@@ -508,6 +508,7 @@ class Program
 
     static void ModifyUser(User userDict)
     {
+            
         int inputId = InputValidUserId(userDict, "izmijeniti");
         var modifiedInfo = AddUserInfo(userDict, inputId,false);
         if (ConfirmationMessage("izmijeniti podatke"))
@@ -522,32 +523,31 @@ class Program
     {
         while (true)
         {
-            Console.WriteLine("0- povratak na KorisnickiIzbornik");
-            Console.WriteLine("1- Ispis korisnika sortiranih abecedno po prezimenu");
-            Console.WriteLine("2 - Ispis korisnika starijih od 20 godina");
+            Console.WriteLine("----------------------");
+            Console.WriteLine("1- Ispis korisnika sortiranih abecedno po prezimenu\n");
+            Console.WriteLine("2 - Ispis korisnika starijih od 20 godina\n");
             Console.WriteLine("3- Ispis korisnika koji imaju bar 2 putovanja");
+            Console.WriteLine("0- povratak na korisnicki izbornik\n");
+            Console.WriteLine("----------------------\n");
             if (int.TryParse(Console.ReadLine(), out int inputNumber))
             {
                 switch (inputNumber)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik\n");
+                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik.\n");
                         UserMenu(userDict);
                         return;
                     case 1:
                         AlphabetSortedOutput(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        WaitingForUser();
                         break;
                     case 2:
                         YearTresholdOutput(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        WaitingForUser();
                         break;
                     case 3:
                         TripTrehsoldOutput(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -562,16 +562,19 @@ class Program
     static void AlphabetSortedOutput(User userDict)
     {
         Console.WriteLine("\nIspis korisnika sortranih abecedno po prezimenu\n");
+        Console.WriteLine("----------------------");
         var dictSorted = userDict.OrderBy(kvPar => kvPar.Value.Item2).ThenBy(kvPar => kvPar.Value.Item1).ToList();
         foreach (var kvPair in dictSorted)
         {
             FormatedOutput(kvPair);
         }
+        Console.WriteLine("----------------------\n");
     }
 
     static void YearTresholdOutput(User userDict)
     {
         Console.WriteLine("\nIspis korisnika starijih od 20 godina\n");
+        Console.WriteLine("----------------------");
         foreach (var user in userDict)
         {
 
@@ -586,16 +589,19 @@ class Program
             if (age > 20)
                 FormatedOutput(user);
         }
+        Console.WriteLine("----------------------\n");
     }
 
     static void TripTrehsoldOutput(User userDict)
     {
         Console.WriteLine("\nIspis korisnika koji imaju bar 2 putovanja\n");
+        Console.WriteLine("----------------------");
         foreach (var user in userDict)
         {
             if (user.Value.Item4.Count >= 2)
                 FormatedOutput(user);
         }
+        Console.WriteLine("----------------------\n");
     }
 
     static void FormatedOutput(KeyValuePair<int, UserDictValue> dictElement)
