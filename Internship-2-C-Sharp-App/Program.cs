@@ -71,6 +71,7 @@ class Program
             Console.WriteLine("----------------------");
             Console.WriteLine("1 - Korisnici\n");
             Console.WriteLine("2 - Putovanja\n");
+            Console.WriteLine("3 - Statistika\n");
             Console.WriteLine("0 - Izlaz iz aplikacije");
             Console.WriteLine("----------------------\n");
             if (int.TryParse(Console.ReadLine(), out int inputMainMenu))
@@ -94,6 +95,15 @@ class Program
                         else Console.WriteLine("Ne postoji niti jedan korisnik.Dodaj barem jednog kako bi mogao pristupiti ovom izborniku.");
 
                         break;
+                    case 3:
+                        if (UserExists(userDict))
+                        {
+                            Console.WriteLine("Uspješan odabir izbornika za statistiku.\n");
+                            StatisticsMenu(userDict);                           
+                        }
+                        else Console.WriteLine("Ne postoji niti jedan korisnik.Dodaj barem jednog kako bi mogao pristupiti ovom izborniku.");
+
+                        break;                    
                     default:
                         Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno");
                         break;
@@ -1248,7 +1258,96 @@ class Program
             if (idList.Contains(trip.Key))
                 userDict[userId].Item4.Remove(trip.Key);       
     }
+
+    static void StatisticsMenu(User userDict)
+    {
+        while (true)
+        {
+            if (!TripExists())
+            {
+                Console.WriteLine("Ne postoji niti jedno putovanje pa nije moguće ispisati statistiku.Vrati se na glavni izbornik\n");
+                
+                WaitingForUser();
+                return;
+            }
+            Console.WriteLine("----------------------");
+            Console.WriteLine("1 - Korisnik s najvećim ukupnim troškom goriva\n");
+            Console.WriteLine("2 - Korisnik s najviše putovanja\n");
+            Console.WriteLine("3 - Prosječan broj putovanja po korisniku\n");
+            Console.WriteLine("4 - Ukupan broj prijeđenih kilometara svih korisnika\n");
+            Console.WriteLine("0 - Povratak na glavni izbornik");
+            Console.WriteLine("----------------------\n");
+            if (int.TryParse(Console.ReadLine(), out int inputMainMenu))
+            {
+                switch (inputMainMenu)
+                {
+                    case 0:
+                        Console.WriteLine("Uspješan odabir.Povratak na glavni izbornik.\n");
+                        MainMenu(userDict);
+                        return;
+                    case 1:
+                        Console.WriteLine("Uspješan odabir.Ispis korisnika s najvećim ukupnim troškom goriva\n");
+                        UserWithMaxSpend(userDict);
+                        
+                        WaitingForUser();
+                        break;
+                    case 2:
+                        Console.WriteLine("Uspješan odabir.Ispis korisnika s najviše putovanja.\n");
+                        UserWithMostTrips(userDict);
+                        
+                        WaitingForUser();
+                        break;
+                    case 3:
+                        Console.WriteLine("Uspješan odabir.Ispis prosječnog broja putovanja po korisniku.\n");
+                        AvgTripNum(userDict);
+                        
+                        WaitingForUser();
+                        break;
+                    default:
+                        Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno");
+                        break;
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nPogrešan tip podatka->unesi cijeli broj.");
+            }
+        }        
+    }
+
+    static void UserWithMaxSpend(User userDict)
+    {
+        double epsilon = 1e-6;
+        var maxPair=userDict.MaxBy(user=>TotalSpend(user.Value.Item4));
+        var maxPairTotal = TotalSpend(maxPair.Value.Item4);
+        var usersMax = userDict.Where(user=>Math.Abs(TotalSpend(user.Value.Item4) - maxPairTotal) < epsilon);
+        Console.WriteLine("Najveći ukupni trošak goriva iznosi: {0:F6}.\n",maxPairTotal);
+        Console.WriteLine("----------------------");
+        foreach (var user in usersMax)
+            FormatedOutput(user);
+        Console.WriteLine("----------------------\n");
+    }
+
+    static void UserWithMostTrips(User userDict)
+    {
+        var mostTripsValue = userDict.MaxBy(user=>user.Value.Item4.Count);
+        var valueCount = mostTripsValue.Value.Item4.Count;
+        var usersMost = userDict.Where(user => user.Value.Item4.Count == valueCount);
+        Console.WriteLine("Najveći broj putovanja nekog korisnika iznosi {0}\n",valueCount);
+        Console.WriteLine("----------------------");
+        foreach (var user in usersMost)
+            FormatedOutput(user);
+        Console.WriteLine("----------------------\n");
+    }
+
+    static void AvgTripNum(User userDict)
+    {
+        var tripCount = userDict.Values.Aggregate(0,(acc,usrValue) => usrValue.Item4.Count + acc);
+        var userCount = userDict.Count;
+        Console.WriteLine("Prosječni broj putovanja po korisniku je: {0}",(float)tripCount/userCount);
+    }
 }
+
 
     
 
