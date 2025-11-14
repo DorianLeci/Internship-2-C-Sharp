@@ -101,11 +101,13 @@ class Program
     {
         while (true)
         {
+            Console.WriteLine("----------------------");
             Console.WriteLine("1 - Unos novog korisnika\n");
             Console.WriteLine("2 - Brisanje korisnika\n");
             Console.WriteLine("3 - Uređivanje korisnika\n");
             Console.WriteLine("4 - Pregled svih korisnika\n");
-            Console.WriteLine("0 - Povratak na glavni izbornik\n");
+            Console.WriteLine("0 - Povratak na glavni izbornik");
+            Console.WriteLine("----------------------\n");
             if (int.TryParse(Console.ReadLine(), out int inputUserMenu))
             {
                 switch (inputUserMenu)
@@ -121,22 +123,35 @@ class Program
                         Console.Read();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje korisnika.\n");
-                        UserDelete(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        if (UserExists(userDict))
+                        {
+                            Console.WriteLine("Uspješan odabir.Brisanje korisnika.\n");
+                            UserDelete(userDict);                           
+                        }
+                        else Console.WriteLine("Ne postoji niti jedan korisnik kojeg možeš obrisati.\n");
+                        
+                        WaitingForUser();
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje korisnika.\n");
-                        ModifyUser(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        if (UserExists(userDict))
+                        {
+                            Console.WriteLine("Uspješan odabir.Uređivanje korisnika.\n");
+                            ModifyUser(userDict);                            
+                        }
+                        else Console.WriteLine("Ne postoji niti jedan korisnik kojeg možeš izmijeniti.\n");
+                        
+                        WaitingForUser();
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih korisnika.\n");
-                        FormatedOutputType(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        if (UserExists(userDict))
+                        {
+                            Console.WriteLine("Uspješan odabir.Pregled svih korisnika.\n");
+                            FormatedOutputType(userDict);                            
+                        }
+                        else Console.WriteLine("Ne postoji niti jedan korisnik.\n");
+                        
+                        WaitingForUser();
+                        
                         break;
                     default:
                         Console.WriteLine("Unos nije među ponuđenima.Unesi ponovno");
@@ -150,6 +165,16 @@ class Program
         }
     }
 
+    static bool UserExists(User userDict)
+    {
+        return userDict.Count != 0;
+    }
+
+    static void WaitingForUser()
+    {
+        Console.WriteLine("...Čeka se any key od korisnika...");
+        Console.ReadKey(true);        
+    }
     static void NewUserInput(User userDict)
     {
         int id = IdInput(userDict);
@@ -277,27 +302,35 @@ class Program
     {
         while (true)
         {
-            Console.WriteLine("1 - Brisanje korisnika po id-u");
-            Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu");
+            Console.WriteLine("----------------------");
+            Console.WriteLine("1 - Brisanje korisnika po id-u\n");
+            Console.WriteLine("2 - Brisanje korisnika po imenu i prezimenu\n");
             Console.WriteLine("0 - Povratak na korisnicki izbornik");
-
+            Console.WriteLine("----------------------\n");
+            if (!UserExists(userDict))
+            {
+                Console.WriteLine("Ne postoji niti jedan korisnik kojeg možeš obrisati.\n");
+                return;
+            }
             if (int.TryParse(Console.ReadLine(), out int inputNumber))
             {
                 switch (inputNumber)
                 {
                     case 0:
-                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik\n");
+                        Console.WriteLine("Uspješan odabir.Povratak na korisnicki izbornik.\n");
                         UserMenu(userDict);
                         return;
                     case 1:
-                        UserDeleteById(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        Console.WriteLine("Uspješan odabir.Brisanje korisnika po id-u.\n");
+                        UserDeleteById(userDict);                           
+                        
+                        WaitingForUser();
                         break;
                     case 2:
-                        UserDeleteByNameSurname(userDict);
-                        Console.WriteLine("...Čeka se any key od korisnika...");
-                        Console.Read();
+                        Console.WriteLine("Uspješan odabir.Brisanje korisnika po imenu i prezimenu.\n");
+                        UserDeleteByNameSurname(userDict);                           
+                            
+                        WaitingForUser();
                         break;
                     default:
                         Console.WriteLine("\nUnos nije među ponuđenima.Unesi ponovno.");
@@ -596,15 +629,15 @@ class Program
                         Console.Read();
                         break;
                     case 2:
-                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.\n");
+                        Console.WriteLine("Uspješan odabir.Brisanje putovanja.");
                         DeleteTrip(userDict);
                         break;
                     case 3:
-                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.\n");
+                        Console.WriteLine("Uspješan odabir.Uređivanje postojećeg putovanja.");
                         ModifyTrip(userDict);
                         break;
                     case 4:
-                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja.\n");
+                        Console.WriteLine("Uspješan odabir.Pregled svih putovanja.");
                         TripOutputSelection(userDict);
                         Console.WriteLine("...Čeka se any key od korisnika...");
                         Console.Read();
@@ -627,6 +660,13 @@ class Program
 
     static void NewTripInput(User userDict)
     {
+        if (userDict.Count == 0)
+        {
+            Console.WriteLine("Ne postoji više niti jedan korisnik za kojega možeš unijeti novo putovanje.");
+            Console.WriteLine("...Čeka se any key od korisnika...");
+            Console.Read();
+            return;
+        }
         int userId = InputValidUserId(userDict, "putovanje");
         Console.WriteLine("Unos za korisnika na id-u: {0} imena {1}",userId,userDict[userId].Item1+" - "+userDict[userId].Item2);
         int tripId = TripIdInput();
@@ -900,7 +940,6 @@ class Program
 
     static void ReportAnalysisSelection(User userDict)
     {
-        
         var inputId = InputValidUserId(userDict, "izvještaj");
         while (true)
         {
@@ -1050,6 +1089,13 @@ class Program
     {
         while (true)
         {
+            if (GlobalTripList.Count == 0)
+            {
+                Console.WriteLine("Ne postoji više niti jedno putovanje koje možeš obrisati.");
+                Console.WriteLine("...Čeka se any key od korisnika...");
+                Console.Read();
+                return;
+            }
             Console.WriteLine("1 - Brisanje putovanja po id-u\n");
             Console.WriteLine("2 - Brisanje svih putovanja skupljih od unesenog iznosa\n");
             Console.WriteLine("3 - Brisanje svih putovanja jefitinijih od unesenog iznosa\n");
@@ -1094,6 +1140,7 @@ class Program
 
     static void DeleteTripById(User userDict)
     {
+        
         int inputId = InputValidTripId("obrisati");              
         if (ConfirmationMessage("obrisati putovanje"))
         {
